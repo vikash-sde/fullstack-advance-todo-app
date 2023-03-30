@@ -1,6 +1,6 @@
 import { User } from "../models/users.models.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { sendCookies } from "../utils/features.js";
 
 export const getAllUsers = async (req, res) => {
   const users = await User.find({});
@@ -15,7 +15,26 @@ export const getAllUsers = async (req, res) => {
   });
 };
 
-export const login = async (req, res) => {};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await User.findOne({ email }).select("+password");
+  if (!user)
+    return res.status(404).json({
+      succcess: false,
+      message: "Invalid Email or Password",
+    });
+
+  const isMatch = await bcrypt.compare(password, user.password);
+
+  if (!isMatch)
+    return res.status(404).json({
+      succcess: false,
+      message: "Invalid Email or Password",
+    });
+
+  sendCookies(user, res, `welcome back, ${user.name}`, 200);
+};
+
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -33,23 +52,17 @@ export const register = async (req, res) => {
       email,
       password: hashedPassword,
     });
-
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-    res
-      .status(201)
-      .cookie("token", token, { httpOnly: true, maxAge: 1000 * 10 * 15 })
-      .json({
-        succcess: true,
-        message: "register successfully",
-      });
+    sendCookies(user, res, "register successfully", 201);
   }
 };
 
 export const getUserDetails = async (req, res) => {
-  // const { id } = req.query;
-  const { id } = req.params;
-  console.log(req.params);
-  const user = await User.findById(id);
+  res.status(200).json({ succcess: true, user: req.user });
+};
 
-  res.json({ succcess: true, user: user });
+export const logout = async (req, res) => {
+  res
+    .status(200)
+    .cookie("token", "", { expires: new Date(Date.now()) })
+    .json({ succcess: true, user: req.user });
 };

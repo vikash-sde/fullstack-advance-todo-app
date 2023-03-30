@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import userRoutes from "./routes/users.routes.js";
+import taskRoutes from "./routes/task.routes.js";
 import dotenv from "dotenv";
 
 export const app = express();
@@ -18,7 +19,8 @@ app.use(express.json());
 
 //Using Routes
 
-app.use("/users", userRoutes);
+app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/task", taskRoutes);
 
 app.get("/", (req, res) => {
   res.send("nice work");
