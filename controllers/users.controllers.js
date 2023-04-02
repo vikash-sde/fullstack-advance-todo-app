@@ -2,57 +2,43 @@ import { User } from "../models/users.models.js";
 import bcrypt from "bcrypt";
 import { sendCookies } from "../utils/features.js";
 
-export const getAllUsers = async (req, res) => {
-  const users = await User.find({});
-  // console.log(req.query);
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select("+password");
 
-  const type = req.query.type;
-  console.log(type);
+    if (!user) return next(new ErrorHandler("Invalid Email or Password", 404));
 
-  res.json({
-    succcess: true,
-    users: users,
-  });
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch)
+      return next(new ErrorHandler("Invalid Email or Password", 404));
+
+    sendCookies(user, res, `welcome back, ${user.name}`, 200);
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email }).select("+password");
-  if (!user)
-    return res.status(404).json({
-      succcess: false,
-      message: "Invalid Email or Password",
-    });
+export const register = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
 
-  const isMatch = await bcrypt.compare(password, user.password);
+    let user = await User.findOne({ email });
 
-  if (!isMatch)
-    return res.status(404).json({
-      succcess: false,
-      message: "Invalid Email or Password",
-    });
-
-  sendCookies(user, res, `welcome back, ${user.name}`, 200);
-};
-
-export const register = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  let user = await User.findOne({ email });
-
-  if (user) {
-    res.status(404).json({
-      succcess: false,
-      message: "user already exist",
-    });
-  } else {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
-    sendCookies(user, res, "register successfully", 201);
+    if (user) {
+      return next(new ErrorHandler("user already exist", 404));
+    } else {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+      });
+      sendCookies(user, res, "register successfully", 201);
+    }
+  } catch (error) {
+    next(error);
   }
 };
 

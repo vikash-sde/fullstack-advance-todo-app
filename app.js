@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import userRoutes from "./routes/users.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import dotenv from "dotenv";
+import { errorMiddleware } from "./middlewares/error.js";
 
 export const app = express();
 dotenv.config({
@@ -25,3 +26,5 @@ app.use("/api/v1/task", taskRoutes);
 app.get("/", (req, res) => {
   res.send("nice work");
 });
+
+app.use(errorMiddleware);
