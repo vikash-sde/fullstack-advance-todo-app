@@ -9,14 +9,16 @@ import {
   updateTask,
 } from "../controllers/task.controllers.js";
 
-const router = express.Router();
+const taskRouter = express.Router();
 
-router.post("/new", isAuthenticated, newTask);
-router.get("/all", isAuthenticated, getAllTask);
+taskRouter.post("/new", isAuthenticated, newTask);
+taskRouter.get("/all", isAuthenticated, getAllTask);
 
-router
+taskRouter
   .route("/:id")
   .put(isAuthenticated, updateTask)
   .delete(isAuthenticated, deleteTask);
 
-export default router;
+export default taskRouter;
+
+// module.exports = taskRouter;

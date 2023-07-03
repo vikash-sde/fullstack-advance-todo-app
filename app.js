@@ -15,6 +15,7 @@ dotenv.config({
   path: "./data/config.env",
 });
 //Using Middlewares
+// app.use(multer().none());
 // app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.json());
