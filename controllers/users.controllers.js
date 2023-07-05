@@ -1,4 +1,4 @@
-import { UserModel } from "../models/users.models.js";
+import { UserModel } from "../models/users.model.js";
 import bcrypt from "bcrypt";
 import { sendCookies } from "../utils/features.js";
 import ErrorHandler from "../middlewares/error.js";
