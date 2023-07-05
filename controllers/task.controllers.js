@@ -1,5 +1,5 @@
 import ErrorHandler from "../middlewares/error.js";
-import { Task } from "../models/tasks.models.js";
+import { TaskModel } from "../models/tasks.models.js";
 
 export const newTask = async (req, res, next) => {
   try {
@@ -7,7 +7,7 @@ export const newTask = async (req, res, next) => {
     //   const task = new Task({title})
     //   await task.save()
 
-    await Task.create({
+    await TaskModel.create({
       title,
       description,
       user: req.user,
@@ -26,7 +26,7 @@ export const getAllTask = async (req, res, next) => {
   try {
     const userid = req.user._id;
 
-    const tasks = await Task.find({ user: userid });
+    const tasks = await TaskModel.find({ user: userid });
 
     res.status(200).json({
       success: true,
@@ -39,7 +39,7 @@ export const getAllTask = async (req, res, next) => {
 
 export const updateTask = async (req, res, next) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const task = await TaskModel.findById(req.params.id);
 
     if (!task) return next(new ErrorHandler("Invalid Id", 404));
 
@@ -58,7 +58,7 @@ export const updateTask = async (req, res, next) => {
 
 export const deleteTask = async (req, res, next) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const task = await TaskModel.findById(req.params.id);
 
     if (!task) return next(new ErrorHandler("Invalid Id", 404));
 
