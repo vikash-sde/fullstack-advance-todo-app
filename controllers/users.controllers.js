@@ -13,11 +13,13 @@ export const register = async (req, res, next) => {
       return next(new ErrorHandler("user already exist", 404));
     } else {
       const hashedPassword = await bcrypt.hash(password, 10);
+
       user = await UserModel.create({
         name,
         email,
         password: hashedPassword,
       });
+
       sendCookies(user, res, "register successfully", 201);
     }
   } catch (error) {
@@ -28,16 +30,17 @@ export const register = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await UserModel.findOne({ email }).select("+password");
-
-    if (!user) return next(new ErrorHandler("Invalid Email or Password", 404));
-
+    const query = { email: email };
+    const user = await UserModel.findOne(query).select("+password");
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch)
+    if (isMatch) {
+      if (user) {
+        sendCookies(user, res, `welcome back, ${user.name}`, 200);
+      }
+    } else {
       return next(new ErrorHandler("Invalid Email or Password", 404));
-
-    sendCookies(user, res, `welcome back, ${user.name}`, 200);
+    }
   } catch (error) {
     next(error);
   }
